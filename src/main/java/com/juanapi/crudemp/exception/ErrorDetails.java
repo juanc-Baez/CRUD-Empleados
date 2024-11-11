@@ -1,16 +1,21 @@
 package com.juanapi.crudemp.exception;
 
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ErrorDetails {
-    private int statusCode;
+    private int status;
     private String message;
     private String details;
 
-    public ErrorDetails(int statusCode, String message, String details) {
-        this.statusCode = statusCode;
+    public ErrorDetails(int status, String message, String details) {
+        this.status = status;
         this.message = message;
         this.details = details;
     }
 
-    // Getters y setters
 }
 

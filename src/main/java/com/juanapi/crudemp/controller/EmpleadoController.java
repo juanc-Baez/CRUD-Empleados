@@ -1,13 +1,14 @@
 package com.juanapi.crudemp.controller;
 
-
-
 import com.juanapi.crudemp.exception.ResourceNotFoundException;
 import com.juanapi.crudemp.model.Empleado;
 import com.juanapi.crudemp.service.EmpleadoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.View;
 import java.util.List;
 
 @RestController
@@ -23,15 +24,14 @@ public class EmpleadoController {
         this.empleadoService = empleadoService;
     }
 
-    //POST CREAR EMPLEADO
-    @PostMapping(value = "/crear")
-    public ResponseEntity<Empleado> crearEmpleado(@RequestBody Empleado empleado) {
+    //Crear Empleados
+    @PostMapping("/crear")
+    public ResponseEntity<Empleado> crearEmpleado(@Valid @RequestBody Empleado empleado) {
         Empleado nuevoEmpleado = empleadoService.crearEmpleado(empleado);
-
         return ResponseEntity.ok(nuevoEmpleado);
     }
 
-    //GET CONSULTA EMPLEADOS
+    //Consulta Empleados
     @GetMapping(value = "/{id}")
     public ResponseEntity<Empleado> obtenerEmpleadoPorId(@PathVariable Long id) throws ResourceNotFoundException {
         Empleado empleado = empleadoService.obtenerEmpleadoPorId(id);
@@ -39,7 +39,7 @@ public class EmpleadoController {
     }
 
     @GetMapping(value = "/apellido")
-    public ResponseEntity<Empleado> obtenerEmpleadoPorApellido(@RequestParam String apellido) throws ResourceNotFoundException {
+    public ResponseEntity<Empleado> obtenerEmpleadoPorApellido(@Valid @RequestParam String apellido) throws ResourceNotFoundException {
         Empleado empleado = empleadoService.obtenerEmpleadoPorApellido(apellido);
         return ResponseEntity.ok(empleado);
     }
@@ -52,14 +52,21 @@ public class EmpleadoController {
 
     //Eliminar empleado
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Empleado> elimEmpleado(@PathVariable Long id) throws ResourceNotFoundException {
-        empleadoService.eliminarEmpleado(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Empleado> elimEmpleado(@Valid @PathVariable Long id) throws ResourceNotFoundException {
+        boolean eliminado = empleadoService.eliminarEmpleado(id);
+        if (eliminado) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }else {
+            return ResponseEntity.notFound().build();  // 404 Not Found
+        }
     }
 
     //Actualizar empleado
     @PutMapping(value = "/actualizar/{id}")
-    public ResponseEntity<Empleado> actualizarEmpleado(@PathVariable Long id, @RequestBody Empleado empleadoDetalles) throws ResourceNotFoundException {
+    public ResponseEntity<Empleado> actualizarEmpleado(@PathVariable Long id,@Valid @RequestBody Empleado empleadoDetalles, BindingResult result) throws ResourceNotFoundException {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(null);
+        }
         Empleado empleadoAct = empleadoService.actualizarEmpleado(id, empleadoDetalles);
         return ResponseEntity.ok(empleadoAct);
     }
